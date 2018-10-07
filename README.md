@@ -15,5 +15,5 @@ Only use them for educational purposes
 ## License ##
 
 This is the license for downloading and using the binaries: [Binaries LICENSE](License_binaries.pdf)<br/>
- -> TL;DR: Without a purchase of the whole source code of the miner no permission is given to anyone to edit, modify or redistribute the native and kotlin binaries. <br/>
+ -> TL;DR: Without a purchase of the whole source code of the miner no permission is given to anyone to edit, modify or redistribute the native and kotlin binaries. <br/><br/>
 This is the license for buying the WHOLE source code: [Source Code LICENSE](License.pdf)
