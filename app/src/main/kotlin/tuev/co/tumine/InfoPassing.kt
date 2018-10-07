@@ -48,11 +48,12 @@ public class InfoPassing(public val context: Context?) : Parcelable {
     /*These are the keys which will be used in the ReceiveInfo connector:
         - info, without error can be: lowMemory, stopped, started
         - info, with error: contains the error message
+        - Logcat messages about some checks before function execution
     */
     public var isBasicLogging = true
 
     //local miner version
-    public val version = 2
+    public val version = 5
 
     //if enabled update the mining part over the internet
     public var updateOverInternet = false
