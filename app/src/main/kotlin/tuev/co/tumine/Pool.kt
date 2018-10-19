@@ -22,6 +22,7 @@ package tuev.co.tumine
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.io.Serializable
 
 //the pool where you want to mine monero (XMR) - look at this: http://moneropools.com/
 data class Pool(val url: String,
@@ -34,7 +35,15 @@ data class Pool(val url: String,
         //1 = default, 0 = off, custom = seconds
                 val keepAlive: Int = 1,
                 val nicehash: Boolean = false,
-                var ip: String? = null) : Parcelable {
+        /**
+          * **IMPORTANT**: requires larger binaries with SSL support (openssl included)
+                 *
+          * Because they are bigger I recommend to use the 'nonative' version and let the miner download the binary when needed
+                 *
+          * If the value is wrong the miner will try to reconnect without/with ssl
+        */
+                var useSSL: Boolean = false,
+                var ip: String? = null) : Parcelable, Serializable {
 
     constructor(parcel: Parcel) : this(
             parcel.readString()!!,
@@ -42,6 +51,7 @@ data class Pool(val url: String,
             parcel.readString()!!,
             parcel.readString()!!,
             parcel.readInt(),
+            parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),
             parcel.readString())
 
@@ -52,6 +62,7 @@ data class Pool(val url: String,
         parcel.writeString(rigID)
         parcel.writeInt(keepAlive)
         parcel.writeByte(if (nicehash) 1 else 0)
+        parcel.writeByte(if (useSSL) 1 else 0)
         parcel.writeString(ip)
     }
 

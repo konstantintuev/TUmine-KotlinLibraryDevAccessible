@@ -27,6 +27,8 @@ public class OutputInfo {
 
     public var message: String? = null
 
+    public var sslVersion: OutputHelperClasses.SslInfo? = null
+
     public var debugInfo: OutputHelperClasses.Debuginfo? = null
 
     public var startMiningInfo: OutputHelperClasses.StartMiningInfo? = null

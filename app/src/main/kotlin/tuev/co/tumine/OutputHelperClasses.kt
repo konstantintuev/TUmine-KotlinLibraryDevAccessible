@@ -28,6 +28,8 @@ public class OutputHelperClasses {
 
         debugInfo,
 
+        sslVersion,
+
         startMiningInfo,
         usingPool,
         lastMiningJobResult,
@@ -108,4 +110,7 @@ public class OutputHelperClasses {
                                 public var versionInfo: OutputHelperClasses.VersionInfo?,
                                 public var cpuInfo: OutputHelperClasses.CpuInfo?,
                                 public var pools: List<String>?)
+
+    public data class SslInfo(public var tlsVersion: String?,
+                              public var tlsFingerprint: String?)
 }

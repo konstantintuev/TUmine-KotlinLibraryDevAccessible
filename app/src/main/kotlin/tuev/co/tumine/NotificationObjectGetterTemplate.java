@@ -18,33 +18,17 @@
  *
  */
 
-package tuev.co.tumine
+package tuev.co.tumine;
 
-public enum class MiningVariant(private val variant: String) {
+import android.app.Notification;
+import android.content.Context;
 
-    VARIANT_AUTO("auto"),
-    VARIANT_0   ("0"),
-    VARIANT_1   ("1"),
-    VARIANT_2   ("2"),
-    VARIANT_TUBE("tube"),
-    VARIANT_XTL ("xtl"),
-    VARIANT_MSR ("msr"),
-    VARIANT_XHV ("xhv");
-
-    public override fun toString(): String {
-        return variant
-    }
-
-    companion object {
-
-        public fun fromString(`in`: String): MiningVariant? {
-            for (dow in MiningVariant.values()) {
-                // Use equalsIgnoreCase to make the getValue method a little more robust
-                if (dow.toString().equals(`in`, ignoreCase = true)) {
-                    return dow
-                }
-            }
-            return null
-        }
-    }
+public abstract class NotificationObjectGetterTemplate {
+    /**
+     *
+     * @param context applicationContext
+     * @return your desired notification for the mining service
+     *
+     */
+    public abstract Notification getNotification(Context context);
 }

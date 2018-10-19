@@ -1,0 +1,12 @@
+Version: 6-ssl
+Updated: 19-10-2018 17:50:12.315
+Format: dd-MM-yyyy HH:mm:ss.SSS
+
+Copied from -> to:
+
+   tumineProjectRoot/android/libs/arm64-v8a/tumine_ssl -> tumineProjectRoot/android-out/ssl/assets/tumine64arm
+
+   tumineProjectRoot/android/libs/armeabi-v7a/tumine_ssl -> tumineProjectRoot/android-out/ssl/assets/tumine86arm
+
+   tumineProjectRoot/android/libs/x86/tumine_ssl -> tumineProjectRoot/android-out/ssl/assets/tumine86
+

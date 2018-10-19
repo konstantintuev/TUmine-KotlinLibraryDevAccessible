@@ -1,0 +1,12 @@
+Version: 6-basic
+Updated: 19-10-2018 17:50:12.238
+Format: dd-MM-yyyy HH:mm:ss.SSS
+
+Copied from -> to:
+
+   tumineProjectRoot/android/libs/arm64-v8a/tumine -> tumineProjectRoot/android-out/basic/assets/tumine64arm
+
+   tumineProjectRoot/android/libs/armeabi-v7a/tumine -> tumineProjectRoot/android-out/basic/assets/tumine86arm
+
+   tumineProjectRoot/android/libs/x86/tumine -> tumineProjectRoot/android-out/basic/assets/tumine86
+
