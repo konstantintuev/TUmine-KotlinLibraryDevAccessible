@@ -482,13 +482,17 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
          */
         @TargetApi(Build.VERSION_CODES.O)
         private fun scheduleJob(context: Context) {
+            val jobScheduler = context.applicationContext.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
+            if (jobScheduler.getPendingJob(2521) != null) {
+                return
+            }
+
             val componentName = ComponentName(context, MineJobService::class.java)
             val jobInfo = JobInfo.Builder(2521, componentName)
                     .setRequiresCharging(false)
                     .setPeriodic(15 * 60 * 1000)
                     .build()
 
-            val jobScheduler = context.applicationContext.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
             val resultCode = jobScheduler.schedule(jobInfo)
             if (resultCode == JobScheduler.RESULT_SUCCESS) {
                 Log.d("TUmine", "Job scheduled!")
