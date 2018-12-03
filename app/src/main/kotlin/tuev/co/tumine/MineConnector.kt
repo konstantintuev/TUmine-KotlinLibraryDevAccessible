@@ -30,6 +30,12 @@ import android.os.Handler
  * Automatically:
  *  * connects to the miner if the service is running.
  *  * stops itself and removes all hooks
+ *
+ *  @param isBasicLogging parse data from the miner ONLY about:
+ *   - lastMiningJobResult
+ *   - hashrate and hashratePerThread
+ *   - lastError
+ *   - initInfo
  */
 class MineConnector(val messageReciever: OnMessageReceived, val context: Context, isBasicLogging: Boolean) {
     private var attached = false

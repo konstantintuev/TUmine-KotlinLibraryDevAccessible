@@ -25,7 +25,7 @@ import android.os.Parcelable
 import java.io.Serializable
 
 //the pool where you want to mine monero (XMR) - look at this: http://moneropools.com/
-data class Pool(val url: String,
+data class Pool @JvmOverloads constructor(val url: String,
         //specify appropriate username based on the mining pool you are using
                 val user: String,
         //specify appropriate password based on the mining pool you are using

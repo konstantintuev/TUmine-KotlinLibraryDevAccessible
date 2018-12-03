@@ -20,7 +20,7 @@
 
 package tuev.co.tumine
 
-interface OnMessageReceived {
+public interface OnMessageReceived {
     fun messageReceived(message: OutputInfo)
     fun connected()
 }

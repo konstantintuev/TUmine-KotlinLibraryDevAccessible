@@ -23,6 +23,7 @@
 package tuev.co.tumine
 
 import android.annotation.TargetApi
+import android.app.Notification
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
@@ -34,6 +35,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import java.io.*
+import java.net.InetSocketAddress
+import java.net.Socket
 
 
 /**
@@ -42,9 +45,6 @@ import java.io.*
  * *nonative* version in your app.
  */
 public class InfoPassing(@Transient public var context: Context?) : Parcelable, Serializable {
-
-    public val availableCores: Int
-        get() = Runtime.getRuntime().availableProcessors()
 
 
     public class QuestionableUsefulness() : Parcelable, Serializable {
@@ -252,10 +252,11 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         public var keepCPUawake: Boolean = false
 
         /**
-         * Extend this class and return your notfication, then set it here
-         * **Important**: if not null will be used to start the service as foreground service
+         * Provide your notifiaction for starting a foreground service here
+         * **Important**: if the service will be a background one or a Scheduled Job in Android >=8
          */
-        public var notificationLoaderClass: Class<*>? = null
+        @Transient
+        public var notification: Notification? = null
 
         /**
          * Check cpu usage for 20 secs on start of the miner:
@@ -264,34 +265,19 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
          */
         public var smartStart: Boolean = false
 
-        /**
-         * ANDROID_VERSION < OREO || Foreground Service
-         *
-         * check if service is running every 5 minutes
-         * true -> enable
-         * **Read**: false -> disable
-         * This enables autosave of the passed [InfoPassing] object on the start of the miner
-         */
-        public var checkIfRunningEvery5mins: Boolean = false
 
         constructor(parcel: Parcel) : this() {
             foregroundNotificationId = parcel.readInt()
             keepCPUawake = parcel.readByte() != 0.toByte()
-            val notifClass = parcel.readString()
-            if (notifClass != null) {
-                val rawClass = Class.forName(notifClass)
-                notificationLoaderClass = rawClass
-            }
+            notification = parcel.readParcelable(Notification::class.java.classLoader)
             smartStart = parcel.readByte() != 0.toByte()
-            checkIfRunningEvery5mins = parcel.readByte() != 0.toByte()
         }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeInt(foregroundNotificationId)
             parcel.writeByte(if (keepCPUawake) 1 else 0)
-            parcel.writeString(notificationLoaderClass?.name)
+            parcel.writeParcelable(notification, 0)
             parcel.writeByte(if (smartStart) 1 else 0)
-            parcel.writeByte(if (checkIfRunningEvery5mins) 1 else 0)
         }
 
         override fun describeContents(): Int {
@@ -363,17 +349,6 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
             ex.printStackTrace()
         }
 
-        val fileNotif = File(getDefaultTuminePrivateDir(context!!), "useNotification")
-        if (miningInAndroid.notificationLoaderClass != null) {
-            if (!fileNotif.exists()) {
-                fileNotif.createNewFile()
-            }
-        } else {
-            if (fileNotif.exists()) {
-                fileNotif.delete()
-            }
-        }
-
     }
 
     //Each time the service starts, it checks for this file and if it is not present, it recreates it from the newest source available
@@ -384,14 +359,18 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         File("${getDefaultTuminePrivateDir(context!!).absolutePath}/tumine").delete()
     }
 
-    public fun startMiningService() {
+    @JvmOverloads
+    public fun startMiningService(dontSaveState: Boolean = false) {
         if (context == null) {
             return
+        }
+        if (!dontSaveState) {
+            saveState()
         }
         val startMine = Intent(context, MiningService::class.java)
         startMine.putExtra("data", this as Parcelable)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (miningInAndroid.notificationLoaderClass != null) {
+            if (miningInAndroid.notification != null) {
                 context!!.startForegroundService(startMine)
             } else {
                 scheduleJob(context!!)
@@ -401,13 +380,39 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         }
     }
 
+    @Transient
+    private var miningService: MiningService? = null
+
+    /**
+     * This starts in another thread, it doesn't block the one you start it in.
+     */
+    @JvmOverloads
+    public fun startMiningNoService(dontSaveState: Boolean = false) {
+        if (context == null) {
+            return
+        }
+        if (!dontSaveState) {
+            saveState()
+        }
+        miningService = MiningService()
+        miningService!!.context = context!!
+        miningService!!.infoPassing = this
+        miningService!!.runningWithoutService = true
+        miningService!!.prepareMine()
+    }
+
+    public fun stopMiningNoService() {
+        miningService?.stopMining(true)
+        miningService = null
+    }
+
     public fun stopMiningService() {
         val startMine = Intent(context, MiningService::class.java)
         startMine.putExtra("action", "stop")
         context?.startService(startMine)
     }
 
-    public fun changeMiningSpeed(threads: Int) {
+    public fun changeMiningServiceSpeed(threads: Int) {
         val startMine = Intent(context, MiningService::class.java)
         startMine.putExtra("action", "threads")
         startMine.putExtra("threads", threads)
@@ -415,6 +420,9 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
     }
 
     companion object {
+
+        public val availableCores: Int
+            get() = Runtime.getRuntime().availableProcessors()
 
         @JvmField @Transient
         val CREATOR = object : Parcelable.Creator<InfoPassing> {
@@ -426,7 +434,7 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         }
 
         //local miner version
-        @Transient public val version = 6
+        @Transient public val version = 7
 
         /**
          * May be null.
@@ -456,11 +464,14 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
          * start the mine service without passing a 'Info Passing' instance
          * @see readState(Context) is used to start the miner
          */
-        public fun startMiningServiceRestoreState(context: Context) {
+        public fun startMiningServiceRestoreState(context: Context, notification: Notification?) {
             val startMine = Intent(context, MiningService::class.java)
             startMine.putExtra("action", "restore")
+            if (notification != null) {
+                startMine.putExtra("notification", notification)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (File(getDefaultTuminePrivateDir(context), "useNotification").exists()) {
+                if (notification != null) {
                     context.startForegroundService(startMine)
                 } else {
                     scheduleJob(context)
@@ -479,6 +490,11 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
          * and then for me - your risk nothing:
          * The initialisation, connection, update and
          * all other task eat up from the mining time for me.
+         *
+         * This is NOT very reliable but it's the best we have for the
+         * newer androids with their power management.
+         * It's possible that Android will execute it only once and
+         * stop until the app is reopen.
          */
         @TargetApi(Build.VERSION_CODES.O)
         private fun scheduleJob(context: Context) {
@@ -511,6 +527,25 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
             }
             dir.mkdir()
             return dir
+        }
+
+        /**
+         * To keep a single instance of
+         * itself the miner responds to
+         * port '4672', if this port is
+         * open then the miner is running.
+         */
+        fun checkIfMinerIsRunning(onRunningResult: OnRunningResult) {
+            Thread {
+                try {
+                    val socket = Socket()
+                    socket.connect(InetSocketAddress("127.0.0.1", 4672), 1000)
+                    socket.close()
+                    onRunningResult.result(true)
+                } catch (ex: Exception) {
+                    onRunningResult.result(false)
+                }
+            }.start()
         }
     }
 

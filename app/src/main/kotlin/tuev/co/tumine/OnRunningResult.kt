@@ -18,17 +18,8 @@
  *
  */
 
-package tuev.co.tumine;
+package tuev.co.tumine
 
-import android.app.Notification;
-import android.content.Context;
-
-public abstract class NotificationObjectGetterTemplate {
-    /**
-     *
-     * @param context applicationContext
-     * @return your desired notification for the mining service
-     *
-     */
-    public abstract Notification getNotification(Context context);
+interface OnRunningResult {
+    fun result(running: Boolean)
 }
