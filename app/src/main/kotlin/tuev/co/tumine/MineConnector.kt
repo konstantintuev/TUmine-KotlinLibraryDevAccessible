@@ -45,8 +45,11 @@ class MineConnector(val messageReciever: OnMessageReceived, val context: Context
     private var receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if(intent?.extras?.getBoolean("started") == true) {
-                sockListener.runTask()
-                messageReciever.connected()
+                if (!attached) {
+                    attached = true
+                    sockListener.runTask()
+                    messageReciever.connected()
+                }
             } else if (intent?.extras?.getBoolean("stopped") == true) {
                 sockListener.stopClient()
             }
@@ -98,6 +101,5 @@ class MineConnector(val messageReciever: OnMessageReceived, val context: Context
             isRunning.putExtra("action", "report")
             context.sendBroadcast(isRunning)
         }, 2500)
-        attached = true
     }
 }
