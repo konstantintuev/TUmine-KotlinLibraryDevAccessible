@@ -36,11 +36,19 @@ import android.os.Handler
  *   - hashrate and hashratePerThread
  *   - lastError
  *   - initInfo
+ *
+ *   @param useMinus11InsteadOfNull if a number can't be parsed, return -11 instead of null
  */
-class MineConnector(val messageReciever: OnMessageReceived, val context: Context, isBasicLogging: Boolean) {
+class MineConnector (val messageReceiver: OnMessageReceived, val context: Context, isBasicLogging: Boolean, useMinus11InsteadOfNull: Boolean) {
+
+    public constructor(messageReceiver: OnMessageReceived, infoPassing: InfoPassing) : this(messageReceiver,
+            infoPassing.context!!,
+            infoPassing.minerOutput.isBasicLogging,
+            infoPassing.minerOutput.useMinus11InsteadOfNull);
+
     private var attached = false
 
-    private var sockListener = SockClient(messageReciever, context, isBasicLogging)
+    private var sockListener = SockClient(messageReceiver, context, isBasicLogging, useMinus11InsteadOfNull)
 
     private var receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -48,7 +56,7 @@ class MineConnector(val messageReciever: OnMessageReceived, val context: Context
                 if (!attached) {
                     attached = true
                     sockListener.runTask()
-                    messageReciever.connected()
+                    messageReceiver.connected()
                 }
             } else if (intent?.extras?.getBoolean("stopped") == true) {
                 sockListener.stopClient()

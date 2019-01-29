@@ -108,11 +108,18 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         //might improve performance
         public var silent: Boolean = false
 
+        /**
+         * if returned number [Double] or [Integer]
+         * is invalid, return -11 instead of null
+         */
+        public var useMinus11InsteadOfNull = false
+
         constructor(parcel: Parcel) : this() {
             isBasicLogging = parcel.readByte() != 0.toByte()
             debugParams = parcel.readByte() != 0.toByte()
             reportOnlyBasics = parcel.readByte() != 0.toByte()
             silent = parcel.readByte() != 0.toByte()
+            useMinus11InsteadOfNull = parcel.readByte() != 0.toByte()
         }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -120,6 +127,7 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
             parcel.writeByte(if (debugParams) 1 else 0)
             parcel.writeByte(if (reportOnlyBasics) 1 else 0)
             parcel.writeByte(if (silent) 1 else 0)
+            parcel.writeByte(if (useMinus11InsteadOfNull) 1 else 0)
         }
 
         override fun describeContents(): Int {
@@ -434,7 +442,7 @@ public class InfoPassing(@Transient public var context: Context?) : Parcelable, 
         }
 
         //local miner version
-        @Transient public val version = 7
+        @Transient public val version = 9
 
         /**
          * May be null.
