@@ -1,4 +1,6 @@
-# TUmine kotlin part - developer accessible classes #
+# TUmine kotlin part - developer accessible classes - DEPRECATED #
+
+# USE [the rewritten TUmine library in Java](https://github.com/konstantintuev/TUmine-JavaLibraryDevAccessible). #
 
 ## What is this? ##
 
